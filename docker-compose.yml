@@ -1,0 +1,29 @@
+services:
+  store_service:
+    build:
+      context: ./store
+    ports:
+      - 3000:3000
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres
+    restart: always
+    #    secrets:
+    #      - db-password
+#    volumes:
+#      - db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=pzstrdb
+      - POSTGRES_USER=pzstruser
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  db-data:
