@@ -4,9 +4,11 @@ services:
       context: ./store
     ports:
       - 3000:3000
-    depends_on:
-      db:
-        condition: service_healthy
+#    depends_on:
+#      db:
+#        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgres://pzstruser:password@db:5432/pzstrdb
   db:
     image: postgres
     restart: always

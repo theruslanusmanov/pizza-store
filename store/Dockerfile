@@ -11,6 +11,6 @@ COPY .. /app/
 
 RUN cargo build --release
 
-EXPOSE 8080
+EXPOSE 3000
 
 ENTRYPOINT ["/bin/bash", "-c", "cargo run --release"]
