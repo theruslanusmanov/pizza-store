@@ -1,12 +1,13 @@
+use axum::extract::Path;
 use axum::{
+    Router,
     extract::State,
     http::StatusCode,
     response::Json,
-    routing::{get, post},
-    Router,
+    routing::{delete, get, patch, post},
 };
 use diesel::prelude::*;
-use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 use std::net::SocketAddr;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -68,6 +69,8 @@ async fn main() {
     let app = Router::new()
         .route("/user/list", get(list_users))
         .route("/user/create", post(create_user))
+        .route("/user/{id}", delete(delete_user))
+        .route("/user/{id}", patch(update_user))
         .with_state(pool);
 
     // run it with hyper
@@ -88,6 +91,40 @@ async fn create_user(
                 .values(new_user)
                 .returning(User::as_returning())
                 .get_result(conn)
+        })
+        .await
+        .map_err(internal_error)?
+        .map_err(internal_error)?;
+    Ok(Json(res))
+}
+
+async fn delete_user(
+    State(pool): State<deadpool_diesel::postgres::Pool>,
+    Path(id): Path<i32>,
+) -> Result<Json<usize>, (StatusCode, String)> {
+    let conn = pool.get().await.map_err(internal_error)?;
+    let res = conn
+        .interact(move |conn| {
+            diesel::delete(users::table.find(id))
+                .execute(conn)
+        })
+        .await
+        .map_err(internal_error)?
+        .map_err(internal_error)?;
+    Ok(Json(res))
+}
+
+async fn update_user(
+    State(pool): State<deadpool_diesel::postgres::Pool>,
+    Path(id): Path<i32>,
+    Json(new_user): Json<NewUser>,
+) -> Result<Json<usize>, (StatusCode, String)> {
+    let conn = pool.get().await.map_err(internal_error)?;
+    let res = conn
+        .interact(move |conn| {
+            diesel::update(users::table.find(id))
+                .set(users::name.eq(new_user.name))
+                .execute(conn)
         })
         .await
         .map_err(internal_error)?
