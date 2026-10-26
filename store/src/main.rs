@@ -1,3 +1,5 @@
+mod users;
+
 use axum::extract::Path;
 use axum::{
     Router,

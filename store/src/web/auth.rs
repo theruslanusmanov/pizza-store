@@ -1,3 +1,16 @@
+use askama::Template;
+use axum::{
+    extract::Query,
+    http::StatusCode,
+    response::{Html, IntoResponse, Redirect},
+    routing::{get, post},
+    Form, Router,
+};
+use axum_login::tower_sessions::Session;
+use serde::Deserialize;
+
+use crate::{users::AuthSession, web::oauth::CSRF_STATE_KEY};
+
 pub const NEXT_URL_KEY: &str = "auth.next-url";
 
 #[derive(Template)]
@@ -18,7 +31,7 @@ pub fn router() -> Router<()> {
     Router::new()
         .route("/login", post(self::post::login))
         .route("/login", get(self::get::login))
-        .route("/logout", get(self::get::login))
+        .route("/logout", get(self::get::logout))
 }
 
 mod post {
@@ -49,12 +62,14 @@ mod get {
     use super::*;
 
     pub async fn login(Query(NextUrl { next }): Query<NextUrl>) -> Html<String> {
-        Html(LoginTemplate {
-            message: None,
-            next,
-        })
-        .render()
-        .unwrap()
+        Html(
+            LoginTemplate {
+                message: None,
+                next,
+            }
+                .render()
+                .unwrap(),
+        )
     }
 
     pub async fn logout(auth_session: AuthSession) -> impl IntoResponse {

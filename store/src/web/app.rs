@@ -1,7 +1,26 @@
-pub struct App {}
+use std::env;
+
+use axum_login::{
+    require::{RedirectHandler, Require},
+    tower_sessions::{cookie::SameSite, Expiry, MemoryStore, SessionManagerLayer},
+    AuthManagerLayerBuilder,
+};
+use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, TokenUrl};
+use sqlx::SqlitePool;
+use time::Duration;
+
+use crate::{
+    users::{Backend, BasicClientSet},
+    web::{auth, oauth, protected},
+};
+
+pub struct App {
+    db: SqlitePool,
+    client: BasicClientSet,
+}
 
 impl App {
-    pub async fn new() -> Result<Self, Box<dyn Error>> {
+    pub async fn new() -> Result<Self, Box<dyn std::error::Error>> {
         dotenvy::dotenv()?;
 
         let client_id = env::var("CLIENT_ID")
@@ -9,7 +28,7 @@ impl App {
             .expect("CLIENT_ID should be provided.");
         let client_secret = env::var("CLIENT_SECRET")
             .map(ClientSecret::new)
-            .expect("CLIENT_SECRET should be provided.");
+            .expect("CLIENT_SECRET should be provided");
 
         let auth_url = AuthUrl::new("https://github.com/login/oauth/authorize".to_string())?;
         let token_url = TokenUrl::new("https://github.com/login/oauth/access_token".to_string())?;
@@ -19,34 +38,40 @@ impl App {
             .set_token_uri(token_url);
 
         let db = SqlitePool::connect(":memory:").await?;
-        sqlx::migrate!("./migrations").run(&db).await?;
+        sqlx::migrate!().run(&db).await?;
 
         Ok(Self { db, client })
     }
 
-    pub async fn serve(self) -> Result<(), Box<dyn Error>> {
+    pub async fn serve(self) -> Result<(), Box<dyn std::error::Error>> {
         // Session layer.
+        //
+        // This uses `tower-sessions` to establish a layer that will provide the session
+        // as a request extension.
         let session_store = MemoryStore::default();
         let session_layer = SessionManagerLayer::new(session_store)
             .with_secure(false)
-            .with_same_site(SameSite::Lax)
-            .with_expiry(Expiry::OnInactivity(Deration::days(1)));
+            .with_same_site(SameSite::Lax) // Ensure we send the cookie from the OAuth redirect.
+            .with_expiry(Expiry::OnInactivity(Duration::days(1)));
 
         // Auth service.
+        //
+        // This combines the session layer with our backend to establish the auth
+        // service which will provide the auth session as a request extension.
         let backend = Backend::new(self.db, self.client);
         let auth_layer = AuthManagerLayerBuilder::new(backend, session_layer).build();
 
         let require_login = Require::<Backend>::builder()
-            .unaunthenticated(RedirectHandler::new().login_url("/login"))
+            .unauthenticated(RedirectHandler::new().login_url("/login"))
             .build();
 
-        let app =protected::router()
+        let app = protected::router()
             .route_layer(require_login)
             .merge(auth::router())
             .merge(oauth::router())
             .layer(auth_layer);
 
-        let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
+        let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
         axum::serve(listener, app.into_make_service()).await?;
 
         Ok(())
