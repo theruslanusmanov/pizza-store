@@ -27,10 +27,10 @@ mod get {
                 ProtectedTemplate {
                     username: &user.username,
                 }
-                    .render()
-                    .unwrap(),
+                .render()
+                .unwrap(),
             )
-                .into_response(),
+            .into_response(),
 
             None => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
         }

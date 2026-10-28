@@ -67,8 +67,8 @@ mod get {
                 message: None,
                 next,
             }
-                .render()
-                .unwrap(),
+            .render()
+            .unwrap(),
         )
     }
 
