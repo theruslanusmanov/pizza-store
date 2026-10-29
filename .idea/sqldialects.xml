@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/services/products-service/migrations/20220411052503_initial.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/services/products-service/migrations/20220610234429_add_user_follows.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/services/products-service/migrations/20220610234831_add_user_favorites.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/services/products-service/migrations/20220613214350_add_articles.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/services/products-service/migrations/20220617192340_add_comments.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/services/products-service/queries/get_article_by_slug.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/services/products-service/queries/get_articles.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/services/products-service/queries/insert_article.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/services/products-service/queries/update_article.sql" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/store/migrations/20231108213118_init.sql" dialect="GenericSQL" />
   </component>
 </project>
