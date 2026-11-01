@@ -1,5 +1,5 @@
+use crate::connection_pool::PizzaConnectionPool;
 use crate::core::products_repository::ProductsRepository;
-use crate::domain::connection_pool::PizzaConnectionPool;
 use crate::domain::products::models::ProductsDto;
 use async_trait::async_trait;
 use sqlx::query_file_as;
