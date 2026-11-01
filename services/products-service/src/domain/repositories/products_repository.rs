@@ -2,7 +2,12 @@ use crate::connection_pool::PizzaConnectionPool;
 use crate::core::products_repository::ProductsRepository;
 use crate::domain::products::models::ProductsDto;
 use async_trait::async_trait;
-use sqlx::query_file_as;
+use sqlx::{FromRow, query};
+
+#[derive(FromRow)]
+struct GetProductQuery {
+    pub id: i64,
+}
 
 #[derive(Clone)]
 pub struct PostgresProductsRepository {
@@ -10,18 +15,21 @@ pub struct PostgresProductsRepository {
 }
 
 impl PostgresProductsRepository {
-    pub fn new(pool: PizzaConnectionPool) -> Self { Self { pool } }
+    pub fn new(pool: PizzaConnectionPool) -> Self {
+        Self { pool }
+    }
 }
 
 #[async_trait]
 impl ProductsRepository for PostgresProductsRepository {
     async fn get_products(&self) -> anyhow::Result<Vec<ProductsDto>> {
-        query_file_as!(
-            GetProductQuery,
-            "queries/get_articles.sql",
-        )
+        let product = ProductsDto {
+            id: 0,
+        };
+        Ok(vec![product])
+       /* query!("SELECT * FROM products as products")
             .fetch_all(&self.pool)
             .await
-            .context("an unexpected error occured retrieving articles")
+            .context("an unexpected error occured retrieving articles")*/
     }
 }
