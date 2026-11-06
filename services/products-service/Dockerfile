@@ -22,10 +22,10 @@ RUN --mount=type=cache,target=/app/target \
     set -eux; \
     rustup install stable; \
     cargo build --workspace --release; \
-    objcopy --compress-debug-sections target/release/pizza-store ./pizza-store
+    objcopy --compress-debug-sections target/release/products-service ./products-service
 
 # stage two - we'll utilize a second container to run our built binary from our first container - slim containers!
-FROM debian:11.3-slim as deploy
+FROM ubuntu:26.04 as deploy
 
 RUN set -eux; \
     export DEBIAN_FRONTEND=noninteractive; \
@@ -37,6 +37,6 @@ RUN set -eux; \
 
 WORKDIR /deploy
 
-COPY --from=build /app/pizza-store ./
+COPY --from=build /app/products-service ./
 
-CMD ["./pizza_store"]
+CMD ["./products-service"]
