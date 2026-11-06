@@ -1,11 +1,9 @@
-version: '3.9'
-
 services:
   pizza_store:
     container_name: pizza_store
     build:
       context: ..
-      dockerfile: services/products-service/src/Dockerfile
+      dockerfile: services/products-service/Dockerfile
     volumes:
       - /tmp/app:/var/log/app
     ports:
@@ -14,5 +12,5 @@ services:
       - ../.env
       - ../.env.docker
     depends_on:
-      realworld_rust_axum_sqlx_postgres:
+      pizza_store_postgres:
         condition: service_healthy

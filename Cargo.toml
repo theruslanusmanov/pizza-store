@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    # our runnable applications
+    "services/products-service",
+]
+
+[profile.release]
+debug = true
