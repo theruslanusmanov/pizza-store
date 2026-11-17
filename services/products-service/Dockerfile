@@ -4,7 +4,7 @@
 # after containerization, this manages to come in at a whopping ~163mb, still a bit to we could optimize but this should do for now
 
 # stage one - copy over our build files for compilation, including workspace and .env files
-FROM rust:1.61.0-slim-bullseye AS build
+FROM rust:1.97.1-slim-bullseye AS build
 
 WORKDIR /app
 
