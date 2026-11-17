@@ -6,7 +6,7 @@ default_to_workspace = false
 
 [tasks.dev]
 install_crate="cargo-watch"
-cwd = "./crates/conduit-bin"
+cwd = "./services"
 command = "cargo"
 args = ["watch", "-x", "clippy", "-x", "run"]
 dependencies = ["postgres"]
@@ -25,7 +25,7 @@ command = "docker"
 args = [
     "compose",
     "-f", "./deploy/docker-compose.postgres.yml",
-    "-f", "./deploy/docker-compose.conduit-bin.yml",
+    "-f", "./deploy/docker-compose.services.yml",
     "up",
     "--build"
 ]
@@ -36,7 +36,7 @@ args = [
     "compose",
     "-f", "./deploy/docker-compose.metrics.yml",
     "-f", "./deploy/docker-compose.postgres.yml",
-    "-f", "./deploy/docker-compose.conduit-bin.yml",
+    "-f", "./deploy/docker-compose.services.yml",
     "start"
 ]
 
@@ -44,7 +44,6 @@ args = [
 command = "docker"
 args = [
     "compose",
-    "-f", "./deploy/docker-compose.metrics.yml",
     "-f", "./deploy/docker-compose.postgres.yml",
     "start"
 ]
